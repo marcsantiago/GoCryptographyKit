@@ -28,4 +28,12 @@ func TestCaserCipher(t *testing.T) {
 			t.FailNow()
 		}
 	}
+	encodedMsg, err := caeser.Encode(message, 5)
+	if err != nil {
+		panic(err)
+	}
+	_, err = caeser.BruteForceDecrypt(encodedMsg, 20)
+	if err != nil {
+		panic(err)
+	}
 }

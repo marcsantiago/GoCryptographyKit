@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+
+	"../detect_english"
 )
 
 const (
-	// LOWERCASE ...
-	LOWERCASE = "abcdefghijklmnopqrstuvwxyz"
-	// UPPERCASE ...
-	UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// LowerCase ...
+	LowerCase = "abcdefghijklmnopqrstuvwxyz"
+	// UpperCase ...
+	UpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
 // Encode ...
@@ -28,13 +30,13 @@ func Encode(message string, key int16) (string, error) {
 		if unicode.IsLetter(r) {
 			pos := r
 			pos += rune(key)
-			if strings.ContainsAny(string(r), UPPERCASE) {
+			if strings.ContainsAny(string(r), UpperCase) {
 				if pos > 'Z' {
 					pos -= 26
 				} else if pos < 'A' {
 					pos += 26
 				}
-			} else if strings.ContainsAny(string(r), LOWERCASE) {
+			} else if strings.ContainsAny(string(r), LowerCase) {
 				if pos > 'z' {
 					pos -= 26
 				} else if pos < 'a' {
@@ -63,13 +65,13 @@ func Decode(message string, key int16) (string, error) {
 		if unicode.IsLetter(r) {
 			pos := r
 			pos += rune(key)
-			if strings.ContainsAny(string(r), UPPERCASE) {
+			if strings.ContainsAny(string(r), UpperCase) {
 				if pos > 'Z' {
 					pos -= 26
 				} else if pos < 'A' {
 					pos += 26
 				}
-			} else if strings.ContainsAny(string(r), LOWERCASE) {
+			} else if strings.ContainsAny(string(r), LowerCase) {
 				if pos > 'z' {
 					pos -= 26
 				} else if pos < 'a' {
@@ -82,4 +84,40 @@ func Decode(message string, key int16) (string, error) {
 		}
 	}
 	return buf.String(), nil
+}
+
+// BruteForceDecrypt ...
+func BruteForceDecrypt(encodedMessage string, accuracy int16) (string, error) {
+	var buf bytes.Buffer
+	for i := 1; i < 27; i++ {
+		key := -i
+		for _, r := range encodedMessage {
+			if unicode.IsLetter(r) {
+				pos := r
+				pos += rune(key)
+				if strings.ContainsAny(string(r), UpperCase) {
+					if pos > 'Z' {
+						pos -= 26
+					} else if pos < 'A' {
+						pos += 26
+					}
+				} else if strings.ContainsAny(string(r), LowerCase) {
+					if pos > 'z' {
+						pos -= 26
+					} else if pos < 'a' {
+						pos += 26
+					}
+				}
+				buf.WriteRune(pos)
+			} else {
+				buf.WriteRune(r)
+			}
+		}
+		message := buf.String()
+		buf.Reset()
+		if detect.English(message, accuracy) {
+			return fmt.Sprintf("Key: %d Message: %s\n", key*-1, message), nil
+		}
+	}
+	return "", fmt.Errorf("Message could be decoded, try lowering the accuracy level")
 }
