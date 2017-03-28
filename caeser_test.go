@@ -14,12 +14,17 @@ const message = `On offering to help the blind man, the man who then stole his c
 
 func TestCaserCipher(t *testing.T) {
 	for i := 1; i < 27; i++ {
-		msg := caeser.NewMessage(message)
-		msg.EncodeKey(int16(i))
-		msg.DecodeKey(int16(i))
-		if msg.GetDecodedMessage() != message {
-			t.Log("Message not the same", i)
-			t.Log(msg.GetDecodedMessage())
+		encodedMsg, err := caeser.Encode(message, int16(i))
+		if err != nil {
+			panic(err)
+		}
+		decodedMsg, err := caeser.Decode(encodedMsg, int16(i))
+		if err != nil {
+			panic(err)
+		}
+		if decodedMsg != message {
+			t.Log("Message not the same, key:", i)
+			t.Log(decodedMsg)
 			t.FailNow()
 		}
 	}
