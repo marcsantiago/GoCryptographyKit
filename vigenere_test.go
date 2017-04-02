@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"./src/vigenere_cipher"
@@ -16,7 +15,6 @@ func TestVigenereCipher(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(msg)
 	msg, err = vigenere.Decode(msg, key)
 	if err != nil {
 		panic(err)
@@ -25,4 +23,15 @@ func TestVigenereCipher(t *testing.T) {
 		t.Log("Plaintext Message not decoded correctly")
 		t.FailNow()
 	}
+
+	msg, err = vigenere.Encode(plainText, "candy")
+	if err != nil {
+		panic(err)
+	}
+	_, err = vigenere.BruteForceDecrypt(msg, 30)
+	if err != nil {
+		t.Log("Try playing with the accuracy, also remember this only works if the encrypt key is a single word")
+		t.FailNow()
+	}
+
 }
