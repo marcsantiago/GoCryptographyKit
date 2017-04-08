@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"./src/vigenere_cipher"
@@ -11,6 +12,7 @@ const plainText = `"Be normal, and the crowd will accept you. Be deranged, and t
 const key = `Hey, diddle, diddle, The cat and the fiddle, The cow jumped over the moon; The little dog laughed To see such sport, And the dish ran away with the spoon.`
 
 func TestVigenereCipher(t *testing.T) {
+	// test basic encryption
 	msg, err := vigenere.Encode(plainText, key)
 	if err != nil {
 		panic(err)
@@ -24,6 +26,7 @@ func TestVigenereCipher(t *testing.T) {
 		t.FailNow()
 	}
 
+	// test brute force
 	msg, err = vigenere.Encode(plainText, "candy")
 	if err != nil {
 		panic(err)
@@ -32,6 +35,20 @@ func TestVigenereCipher(t *testing.T) {
 	if err != nil {
 		t.Log("Try playing with the accuracy, also remember this only works if the encrypt key is a single word")
 		t.FailNow()
+	}
+
+	// test file encrytion/decryption
+	f, err := os.Open("the_republic.txt")
+	if err != nil {
+		panic(err)
+	}
+	msg, err = vigenere.Encode(f, key)
+	if err != nil {
+		panic(err)
+	}
+	_, err = vigenere.Decode(msg, key)
+	if err != nil {
+		panic(err)
 	}
 
 }

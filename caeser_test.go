@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"./src/caesar_cipher"
@@ -13,6 +14,7 @@ const message = `On offering to help the blind man, the man who then stole his c
   for it is they who take advantage of the needs of the poor.`
 
 func TestCaserCipher(t *testing.T) {
+	// Test basic key cipher
 	for i := 1; i < 27; i++ {
 		encodedMsg, err := caeser.Encode(message, int16(i))
 		if err != nil {
@@ -28,11 +30,26 @@ func TestCaserCipher(t *testing.T) {
 			t.FailNow()
 		}
 	}
+	// test brute force
 	encodedMsg, err := caeser.Encode(message, 5)
 	if err != nil {
 		panic(err)
 	}
 	_, err = caeser.BruteForceDecrypt(encodedMsg, 20)
+	if err != nil {
+		panic(err)
+	}
+
+	// test file encrytion/decryption
+	f, err := os.Open("the_republic.txt")
+	if err != nil {
+		panic(err)
+	}
+	encodedMsg, err = caeser.Encode(f, 5)
+	if err != nil {
+		panic(err)
+	}
+	_, err = caeser.Decode(encodedMsg, 5)
 	if err != nil {
 		panic(err)
 	}

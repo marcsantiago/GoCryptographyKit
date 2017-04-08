@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,6 +21,21 @@ const (
 	// Alpha ...
 	Alpha = LowerCase + UpperCase
 )
+
+func convert(i interface{}) (string, error) {
+	switch i.(type) {
+	case string:
+		return i.(string), nil
+	case *os.File:
+		var buf bytes.Buffer
+		f := i.(*os.File)
+		defer f.Close()
+		io.Copy(&buf, f)
+		return buf.String(), nil
+	default:
+		return "", fmt.Errorf("Message must be of type string or file")
+	}
+}
 
 func buildKey(message, key string) bytes.Buffer {
 	var buf bytes.Buffer
@@ -39,8 +55,14 @@ func buildKey(message, key string) bytes.Buffer {
 }
 
 // Encode ...
-func Encode(message, key string) (string, error) {
+func Encode(msg interface{}, key string) (string, error) {
 	var buf bytes.Buffer
+
+	message, err := convert(msg)
+	if err != nil {
+		return "", err
+	}
+
 	k := buildKey(message, key)
 	generatedKey := k.String()
 	for i, r := range message {
@@ -70,8 +92,13 @@ func Encode(message, key string) (string, error) {
 }
 
 // Decode ...
-func Decode(message, key string) (string, error) {
+func Decode(msg interface{}, key string) (string, error) {
 	var buf bytes.Buffer
+	message, err := convert(msg)
+	if err != nil {
+		return "", err
+	}
+
 	k := buildKey(message, key)
 	generatedKey := k.String()
 

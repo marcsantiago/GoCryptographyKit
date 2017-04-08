@@ -3,6 +3,8 @@ package caeser
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"unicode"
 
@@ -16,13 +18,33 @@ const (
 	UpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
+func convert(i interface{}) (string, error) {
+	switch i.(type) {
+	case string:
+		return i.(string), nil
+	case *os.File:
+		var buf bytes.Buffer
+		f := i.(*os.File)
+		defer f.Close()
+		io.Copy(&buf, f)
+		return buf.String(), nil
+	default:
+		return "", fmt.Errorf("Message must be of type string or file")
+	}
+}
+
 // Encode ...
-func Encode(message string, key int16) (string, error) {
+func Encode(msg interface{}, key int16) (string, error) {
 	if key > 26 {
 		return "", fmt.Errorf("Key must be less than 27")
 	}
 	if key == 0 {
 		return "", fmt.Errorf("Key must be greater than 0")
+	}
+
+	message, err := convert(msg)
+	if err != nil {
+		return "", err
 	}
 
 	var buf bytes.Buffer
@@ -52,13 +74,19 @@ func Encode(message string, key int16) (string, error) {
 }
 
 // Decode ...
-func Decode(message string, key int16) (string, error) {
+func Decode(msg interface{}, key int16) (string, error) {
 	if key > 26 {
 		return "", fmt.Errorf("Key must be less than 27")
 	}
 	if key == 0 {
 		return "", fmt.Errorf("Key must be greater than 0")
 	}
+
+	message, err := convert(msg)
+	if err != nil {
+		return "", err
+	}
+
 	key = -key
 	var buf bytes.Buffer
 	for _, r := range message {
