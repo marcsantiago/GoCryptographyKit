@@ -45,6 +45,7 @@ func TestCaserCipher(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer f.Close()
 	encodedMsg, err = caeser.Encode(f, 5)
 	if err != nil {
 		panic(err)

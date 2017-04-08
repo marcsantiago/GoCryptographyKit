@@ -42,6 +42,7 @@ func TestVigenereCipher(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer f.Close()
 	msg, err = vigenere.Encode(f, key)
 	if err != nil {
 		panic(err)
