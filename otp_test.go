@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -19,6 +18,10 @@ func TestOneTimePad(t *testing.T) {
 		panic(err)
 	}
 	defer key.Close()
-	m, _ := otp.Decrypt(msg, key)
-	fmt.Println(m)
+	_, err = otp.Decrypt(msg, key)
+	if err != nil {
+		t.Log(err)
+		t.FailNow()
+	}
+
 }
