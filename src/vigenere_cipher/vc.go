@@ -129,7 +129,7 @@ func Decode(msg interface{}, key string) (string, error) {
 }
 
 // BruteForceDecrypt may work if the key is a single word.  Keys longer then no word have very little change of working with this methods
-func BruteForceDecrypt(message string, accuracy int16) (string, error) {
+func BruteForceDecrypt(message string, accuracy int) (string, error) {
 	path, _ := os.Getwd()
 	words := filepath.Join(path, "/src/detect_english/dictionary.txt")
 	file, err := os.Open(words)

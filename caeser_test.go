@@ -16,11 +16,11 @@ const message = `On offering to help the blind man, the man who then stole his c
 func TestCaserCipher(t *testing.T) {
 	// Test basic key cipher
 	for i := 1; i < 27; i++ {
-		encodedMsg, err := caeser.Encode(message, int16(i))
+		encodedMsg, err := caeser.Encode(message, i)
 		if err != nil {
 			panic(err)
 		}
-		decodedMsg, err := caeser.Decode(encodedMsg, int16(i))
+		decodedMsg, err := caeser.Decode(encodedMsg, i)
 		if err != nil {
 			panic(err)
 		}

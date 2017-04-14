@@ -58,7 +58,7 @@ func removeNonLetters(message string) string {
 }
 
 // English ...
-func English(message string, accuracy int16) bool {
+func English(message string, accuracy int) bool {
 	count := getEnglishCount(message) * 100
 	wordMatch := false
 	if count >= float32(accuracy) {

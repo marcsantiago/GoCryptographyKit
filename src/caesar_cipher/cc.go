@@ -34,7 +34,7 @@ func convert(i interface{}) (string, error) {
 }
 
 // Encode ...
-func Encode(msg interface{}, key int16) (string, error) {
+func Encode(msg interface{}, key int) (string, error) {
 	if key > 26 {
 		return "", fmt.Errorf("Key must be less than 27")
 	}
@@ -74,7 +74,7 @@ func Encode(msg interface{}, key int16) (string, error) {
 }
 
 // Decode ...
-func Decode(msg interface{}, key int16) (string, error) {
+func Decode(msg interface{}, key int) (string, error) {
 	if key > 26 {
 		return "", fmt.Errorf("Key must be less than 27")
 	}
@@ -115,7 +115,7 @@ func Decode(msg interface{}, key int16) (string, error) {
 }
 
 // BruteForceDecrypt ...
-func BruteForceDecrypt(encodedMessage string, accuracy int16) (string, error) {
+func BruteForceDecrypt(encodedMessage string, accuracy int) (string, error) {
 	var buf bytes.Buffer
 	for i := 1; i < 27; i++ {
 		key := -i
