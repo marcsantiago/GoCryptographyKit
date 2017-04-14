@@ -54,8 +54,3 @@ func Encode(msg interface{}) (string, error) {
 	}
 	return strings.TrimSpace(buf.String()), nil
 }
-
-// Decode ...
-func Decode(msg interface{}) (string, error) {
-	return Encode(msg)
-}
