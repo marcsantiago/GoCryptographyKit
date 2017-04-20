@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"io"
 	"os"
 	"testing"
 
@@ -26,17 +24,8 @@ func TestOneTimePad(t *testing.T) {
 		t.Error(err)
 	}
 
-	var buf bytes.Buffer
-	f, err := os.Open("message_test.txt")
-	if err != nil {
-		t.Error(err)
-	}
-	defer f.Close()
-	io.Copy(&buf, f)
-	original := buf.String()
-
-	if original != decoded {
-		t.Errorf("Message not the same\noriginalMessage: %s\nDecodedMessage: %s\n", decoded, original)
+	if message != decoded {
+		t.Errorf("Message not the same\noriginalMessage: %s\nDecodedMessage: %s\n", decoded, message)
 	}
 
 }
