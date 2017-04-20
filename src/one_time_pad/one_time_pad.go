@@ -75,18 +75,19 @@ func generateKey(length int, save bool) string {
 		defer f.Close()
 		f.Write(b)
 	}
-	return stringToBin(string(b))
+	return string(b)
 }
 
 // Encrypt ...
-func Encrypt(msg interface{}, save bool) (string, error) {
+func Encrypt(msg interface{}, save bool) (string, string, error) {
 	message, err := convert(msg)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	var buf bytes.Buffer
 	binMessage := stringToBin(message)
-	key := generateKey(len(message), save)
+	keyString := generateKey(len(message), save)
+	key := stringToBin(keyString)
 	for i := 0; i < len(key); i++ {
 		bin := int(binMessage[i]) ^ int(key[i])
 		_, err := buf.WriteString(strconv.Itoa(bin))
@@ -103,7 +104,7 @@ func Encrypt(msg interface{}, save bool) (string, error) {
 		defer f.Close()
 		f.WriteString(buf.String())
 	}
-	return buf.String(), nil
+	return buf.String(), keyString, nil
 }
 
 // Decrypt ...
