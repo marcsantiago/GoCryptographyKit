@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"testing"
 
@@ -15,41 +17,49 @@ func TestVigenereCipher(t *testing.T) {
 	// test basic encryption
 	msg, err := vigenere.Encode(plainText, key)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	msg, err = vigenere.Decode(msg, key)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if plainText != msg {
-		t.Log("Plaintext Message not decoded correctly")
-		t.FailNow()
+		t.Error("Plaintext Message not decoded correctly")
 	}
 
 	// test brute force
 	msg, err = vigenere.Encode(plainText, "candy")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	_, err = vigenere.BruteForceDecrypt(msg, 30)
 	if err != nil {
-		t.Log("Try playing with the accuracy, also remember this only works if the encrypt key is a single word")
-		t.FailNow()
+		t.Error("Try playing with the accuracy, also remember this only works if the encrypt key is a single word")
 	}
 
 	// test file encrytion/decryption
 	f, err := os.Open("the_republic.txt")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	defer f.Close()
 	msg, err = vigenere.Encode(f, key)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
-	_, err = vigenere.Decode(msg, key)
+
+	var buf bytes.Buffer
+	f, err = os.Open("the_republic.txt")
 	if err != nil {
-		panic(err)
+		t.Error(err)
+	}
+	defer f.Close()
+	io.Copy(&buf, f)
+	original := buf.String()
+
+	decoded, err := vigenere.Decode(msg, key)
+	if original != decoded {
+		t.Errorf("Message not the same\nkey: %d\noriginalMessage: %s\nDecodedMessage: %s\n", 5, decoded, original)
 	}
 
 }

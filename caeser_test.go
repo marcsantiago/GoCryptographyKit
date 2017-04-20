@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"testing"
 
@@ -18,40 +20,52 @@ func TestCaserCipher(t *testing.T) {
 	for i := 1; i < 27; i++ {
 		encodedMsg, err := caeser.Encode(message, i)
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		decodedMsg, err := caeser.Decode(encodedMsg, i)
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		if decodedMsg != message {
-			t.Log("Message not the same, key:", i)
-			t.Log(decodedMsg)
-			t.FailNow()
+			t.Errorf("Message not the same\nkey: %d\noriginalMessage: %s\nDecodedMessage: %s\n", i, message, decodedMsg)
 		}
 	}
 	// test brute force
 	encodedMsg, err := caeser.Encode(message, 5)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	_, err = caeser.BruteForceDecrypt(encodedMsg, 20)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	// test file encrytion/decryption
 	f, err := os.Open("the_republic.txt")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	defer f.Close()
 	encodedMsg, err = caeser.Encode(f, 5)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
-	_, err = caeser.Decode(encodedMsg, 5)
+
+	decoded, err := caeser.Decode(encodedMsg, 5)
 	if err != nil {
-		panic(err)
+		t.Error(err)
+	}
+
+	var buf bytes.Buffer
+	f, err = os.Open("the_republic.txt")
+	if err != nil {
+		t.Error(err)
+	}
+	defer f.Close()
+	io.Copy(&buf, f)
+	original := buf.String()
+
+	if original != decoded {
+		t.Errorf("Message not the same\nkey: %d\noriginalMessage: %s\nDecodedMessage: %s\n", 5, decoded, original)
 	}
 }
