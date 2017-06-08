@@ -20,21 +20,14 @@ const (
 )
 
 func binToString(s []byte) string {
-	var counter int
-	chunk := make([]byte, 7)
-	var buf bytes.Buffer
-	for i := range s {
-		if i%8 == 0 {
-			counter = 0
-			if i, err := strconv.ParseInt(string(chunk), 2, 64); err == nil {
-				buf.WriteString(string(i))
-			}
-		} else {
-			chunk[counter] = s[i]
-			counter++
-		}
-	}
-	return buf.String()
+    output := make([]byte, len(s)/8)
+    for i := 0; i < len(output); i++ {
+        val, err := strconv.ParseInt(string(s[i*8:(i+1)*8]), 2, 64)
+        if err == nil {
+            output[i] = byte(val)
+        }
+    }
+    return string(output)
 }
 
 func convert(i interface{}) (string, error) {
