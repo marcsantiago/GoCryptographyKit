@@ -3,35 +3,12 @@ package caeser
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"os"
 	"strings"
 	"unicode"
 
-	"../detect_english"
+	"github.com/marcsantiago/GoCryptographyKit/internal/convert"
+	"github.com/marcsantiago/GoCryptographyKit/internal/english"
 )
-
-const (
-	// LowerCase ...
-	LowerCase = "abcdefghijklmnopqrstuvwxyz"
-	// UpperCase ...
-	UpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-)
-
-func convert(i interface{}) (string, error) {
-	switch i.(type) {
-	case string:
-		return i.(string), nil
-	case *os.File:
-		var buf bytes.Buffer
-		f := i.(*os.File)
-		defer f.Close()
-		io.Copy(&buf, f)
-		return buf.String(), nil
-	default:
-		return "", fmt.Errorf("Message must be of type string or file")
-	}
-}
 
 // Encode ...
 func Encode(msg interface{}, key int) (string, error) {
@@ -42,7 +19,7 @@ func Encode(msg interface{}, key int) (string, error) {
 		return "", fmt.Errorf("Key must be greater than 0")
 	}
 
-	message, err := convert(msg)
+	message, err := convert.RetrieveDataFromStringOrFile(msg)
 	if err != nil {
 		return "", err
 	}
@@ -52,13 +29,13 @@ func Encode(msg interface{}, key int) (string, error) {
 		if unicode.IsLetter(r) {
 			pos := r
 			pos += rune(key)
-			if strings.ContainsAny(string(r), UpperCase) {
+			if strings.ContainsAny(string(r), english.UpperCase) {
 				if pos > 'Z' {
 					pos -= 26
 				} else if pos < 'A' {
 					pos += 26
 				}
-			} else if strings.ContainsAny(string(r), LowerCase) {
+			} else if strings.ContainsAny(string(r), english.LowerCase) {
 				if pos > 'z' {
 					pos -= 26
 				} else if pos < 'a' {
@@ -82,7 +59,7 @@ func Decode(msg interface{}, key int) (string, error) {
 		return "", fmt.Errorf("Key must be greater than 0")
 	}
 
-	message, err := convert(msg)
+	message, err := convert.RetrieveDataFromStringOrFile(msg)
 	if err != nil {
 		return "", err
 	}
@@ -93,13 +70,13 @@ func Decode(msg interface{}, key int) (string, error) {
 		if unicode.IsLetter(r) {
 			pos := r
 			pos += rune(key)
-			if strings.ContainsAny(string(r), UpperCase) {
+			if strings.ContainsAny(string(r), english.UpperCase) {
 				if pos > 'Z' {
 					pos -= 26
 				} else if pos < 'A' {
 					pos += 26
 				}
-			} else if strings.ContainsAny(string(r), LowerCase) {
+			} else if strings.ContainsAny(string(r), english.LowerCase) {
 				if pos > 'z' {
 					pos -= 26
 				} else if pos < 'a' {
@@ -123,13 +100,13 @@ func BruteForceDecrypt(encodedMessage string, accuracy int) (string, error) {
 			if unicode.IsLetter(r) {
 				pos := r
 				pos += rune(key)
-				if strings.ContainsAny(string(r), UpperCase) {
+				if strings.ContainsAny(string(r), english.UpperCase) {
 					if pos > 'Z' {
 						pos -= 26
 					} else if pos < 'A' {
 						pos += 26
 					}
-				} else if strings.ContainsAny(string(r), LowerCase) {
+				} else if strings.ContainsAny(string(r), english.LowerCase) {
 					if pos > 'z' {
 						pos -= 26
 					} else if pos < 'a' {
@@ -143,7 +120,7 @@ func BruteForceDecrypt(encodedMessage string, accuracy int) (string, error) {
 		}
 		message := buf.String()
 		buf.Reset()
-		if detect.English(message, accuracy) {
+		if english.IsEnglish(message, accuracy) {
 			return fmt.Sprintf("Key: %d Message: %s\n", key*-1, message), nil
 		}
 	}

@@ -1,7 +1,8 @@
-package main
+package atbash
 
-import "testing"
-import "./src/atbash_cipher"
+import (
+	"testing"
+)
 
 var tests = []struct {
 	expected string
@@ -20,7 +21,7 @@ var tests = []struct {
 
 func TestAtbash(t *testing.T) {
 	for _, test := range tests {
-		actual, err := atbash.Encode(test.s)
+		actual, err := Encode(test.s)
 		if err != nil {
 			t.Errorf("%s\n", err.Error())
 		}
@@ -36,7 +37,7 @@ func BenchmarkAtbash(b *testing.B) {
 		b.StartTimer()
 
 		for i := 0; i < b.N; i++ {
-			atbash.Encode(test.s)
+			Encode(test.s)
 		}
 
 		b.StopTimer()
