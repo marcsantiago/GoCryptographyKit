@@ -1,35 +1,24 @@
-package detect
+package english
 
 import (
-	"bufio"
 	"bytes"
 	"os"
-	"path/filepath"
+	"strconv"
 	"strings"
 )
 
-// EnglishWords ...
-var EnglishWords map[string]error
-
-const (
-	// AlphaSpace ...
-	AlphaSpace = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\t\n "
-	// LetterPercent lowering the value might lead to more false positives
-	LetterPercent = 85
+var (
+	// LetterPercent represents the threshold by which one considers a word english.
+	// lowering the value might lead to more false positives, the default is 85
+	// this can be set as a enviromental variable -> PERCENT
+	LetterPercent float32
 )
 
 func init() {
-	path, _ := os.Getwd()
-	words := filepath.Join(path, "/src/detect_english/dictionary.txt")
-	file, err := os.Open(words)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	EnglishWords = make(map[string]error)
-	for scanner.Scan() {
-		EnglishWords[strings.TrimSpace(scanner.Text())] = nil
+	LetterPercent = 85.0
+	percent := os.Getenv("PERCENT")
+	if p, err := strconv.ParseFloat(percent, 32); err == nil && len(percent) > 0 {
+		LetterPercent = float32(p)
 	}
 }
 
@@ -40,7 +29,7 @@ func getEnglishCount(message string) float32 {
 	}
 	var matches int
 	for _, word := range possibleWords {
-		if _, ok := EnglishWords[word]; ok {
+		if _, ok := englishWords[word]; ok {
 			matches++
 		}
 	}
@@ -57,8 +46,8 @@ func removeNonLetters(message string) string {
 	return buf.String()
 }
 
-// English ...
-func English(message string, accuracy int) bool {
+// IsEnglish tries to detemine if a word of sentence is English
+func IsEnglish(message string, accuracy int) bool {
 	count := getEnglishCount(message) * 100
 	wordMatch := false
 	if count >= float32(accuracy) {
@@ -71,5 +60,13 @@ func English(message string, accuracy int) bool {
 		lettersMatch = true
 	}
 	return wordMatch && lettersMatch
+}
 
+// GetWordList retrieves the list of words used to build the English dictonary
+func GetWordList() []string {
+	l := make([]string, 0, len(englishWords))
+	for k := range englishWords {
+		l = append(l, k)
+	}
+	return l
 }

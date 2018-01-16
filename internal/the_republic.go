@@ -1,3 +1,6 @@
+package internal
+
+const TheRepublic = `
 Provided by The Internet Classics Archive.
 See bottom for copyright. Available online at
     http://classics.mit.edu//Plato/republic.html
@@ -14633,3 +14636,4 @@ conventions, including the right of reproduction in whole or in part
 in any form. Direct permission requests to classics@classics.mit.edu.
 Translation of "The Deeds of the Divine Augustus" by Augustus is
 copyright (C) Thomas Bushnell, BSG.
+`

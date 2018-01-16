@@ -1,41 +1,14 @@
 package vigenere
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"unicode"
 
-	"../detect_english"
+	"github.com/marcsantiago/GoCryptographyKit/internal/convert"
+	"github.com/marcsantiago/GoCryptographyKit/internal/english"
 )
-
-const (
-	// LowerCase ...
-	LowerCase = "abcdefghijklmnopqrstuvwxyz"
-	// UpperCase ...
-	UpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	// Alpha ...
-	Alpha = LowerCase + UpperCase
-)
-
-func convert(i interface{}) (string, error) {
-	switch i.(type) {
-	case string:
-		return i.(string), nil
-	case *os.File:
-		var buf bytes.Buffer
-		f := i.(*os.File)
-		defer f.Close()
-		io.Copy(&buf, f)
-		return buf.String(), nil
-	default:
-		return "", fmt.Errorf("Message must be of type string or file")
-	}
-}
 
 func buildKey(message, key string) bytes.Buffer {
 	var buf bytes.Buffer
@@ -58,7 +31,7 @@ func buildKey(message, key string) bytes.Buffer {
 func Encode(msg interface{}, key string) (string, error) {
 	var buf bytes.Buffer
 
-	message, err := convert(msg)
+	message, err := convert.RetrieveDataFromStringOrFile(msg)
 	if err != nil {
 		return "", err
 	}
@@ -70,13 +43,13 @@ func Encode(msg interface{}, key string) (string, error) {
 			pos := r
 			pos += rune(generatedKey[i])
 
-			if strings.ContainsAny(string(r), UpperCase) {
+			if strings.ContainsAny(string(r), english.UpperCase) {
 				if pos > 'Z' {
 					pos -= 26
 				} else if pos < 'A' {
 					pos += 26
 				}
-			} else if strings.ContainsAny(string(r), LowerCase) {
+			} else if strings.ContainsAny(string(r), english.LowerCase) {
 				if pos > 'z' {
 					pos -= 26
 				} else if pos < 'a' {
@@ -94,7 +67,7 @@ func Encode(msg interface{}, key string) (string, error) {
 // Decode ...
 func Decode(msg interface{}, key string) (string, error) {
 	var buf bytes.Buffer
-	message, err := convert(msg)
+	message, err := convert.RetrieveDataFromStringOrFile(msg)
 	if err != nil {
 		return "", err
 	}
@@ -107,13 +80,13 @@ func Decode(msg interface{}, key string) (string, error) {
 			pos := r
 			pos += -rune(generatedKey[i])
 
-			if strings.ContainsAny(string(r), UpperCase) {
+			if strings.ContainsAny(string(r), english.UpperCase) {
 				if pos > 'Z' {
 					pos -= 26
 				} else if pos < 'A' {
 					pos += 26
 				}
-			} else if strings.ContainsAny(string(r), LowerCase) {
+			} else if strings.ContainsAny(string(r), english.LowerCase) {
 				if pos > 'z' {
 					pos -= 26
 				} else if pos < 'a' {
@@ -130,18 +103,9 @@ func Decode(msg interface{}, key string) (string, error) {
 
 // BruteForceDecrypt may work if the key is a single word.  Keys longer then no word have very little change of working with this methods
 func BruteForceDecrypt(message string, accuracy int) (string, error) {
-	path, _ := os.Getwd()
-	words := filepath.Join(path, "/src/detect_english/dictionary.txt")
-	file, err := os.Open(words)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	englishWords := []string{}
-	for scanner.Scan() {
-		englishWords = append(englishWords, scanner.Text())
-		englishWords = append(englishWords, strings.ToLower(scanner.Text()))
+	englishWords := english.GetWordList()
+	for _, word := range englishWords {
+		englishWords = append(englishWords, strings.ToLower(word))
 	}
 
 	var buf bytes.Buffer
@@ -153,13 +117,13 @@ func BruteForceDecrypt(message string, accuracy int) (string, error) {
 				pos := r
 				pos += -rune(generatedKey[i])
 
-				if strings.ContainsAny(string(r), UpperCase) {
+				if strings.ContainsAny(string(r), english.UpperCase) {
 					if pos > 'Z' {
 						pos -= 26
 					} else if pos < 'A' {
 						pos += 26
 					}
-				} else if strings.ContainsAny(string(r), LowerCase) {
+				} else if strings.ContainsAny(string(r), english.LowerCase) {
 					if pos > 'z' {
 						pos -= 26
 					} else if pos < 'a' {
@@ -173,7 +137,7 @@ func BruteForceDecrypt(message string, accuracy int) (string, error) {
 		}
 		msg := buf.String()
 		buf.Reset()
-		if detect.English(msg, accuracy) {
+		if english.IsEnglish(msg, accuracy) {
 			return fmt.Sprintf("Key: %s Message: %s\n", possibleKey, msg), nil
 		}
 	}
